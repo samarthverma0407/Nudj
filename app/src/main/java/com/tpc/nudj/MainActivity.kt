@@ -10,6 +10,8 @@ import androidx.navigation3.ui.NavDisplay
 import com.tpc.nudj.ui.navigation.ScreenRoute
 import com.tpc.nudj.ui.screen.DemoScreen
 import com.tpc.nudj.ui.theme.NudjTheme
+import dagger.hilt.android.AndroidEntryPoint
+@AndroidEntryPoint
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +27,9 @@ class MainActivity : ComponentActivity() {
                             DemoScreen()
                         }
                     }
+
                 )
+
             }
         }
     }
