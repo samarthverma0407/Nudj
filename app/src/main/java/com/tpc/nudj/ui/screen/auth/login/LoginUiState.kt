@@ -1,6 +1,7 @@
 package com.tpc.nudj.ui.screen.auth.login
 
 import com.tpc.nudj.model.enums.Role
+import com.tpc.nudj.ui.navigation.ScreenRoute
 
 data class LoginUiState(
     val isLoading: Boolean = false,
@@ -9,5 +10,6 @@ data class LoginUiState(
     val email:String = "",
     val password:String = "",
     val passwordVisible: Boolean = false,
+    val navigateToRoute: ScreenRoute?=null,
     val role: Role = Role.USER
 )

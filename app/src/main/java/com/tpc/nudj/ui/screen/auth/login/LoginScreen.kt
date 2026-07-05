@@ -28,8 +28,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,16 +59,34 @@ import com.tpc.nudj.ui.components.LoadingIndicator
 import com.tpc.nudj.ui.components.NudjLogo
 import com.tpc.nudj.ui.components.NudjTopAppBar
 import com.tpc.nudj.ui.components.SecondaryButton
+import com.tpc.nudj.ui.navigation.ScreenRoute
 import com.tpc.nudj.ui.theme.LocalAppColors
 
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
-    navigateToCreateAccount: () ->Unit
+    navigateToCreateAccount: () ->Unit,
+    onNavigateToAuthRoute: (ScreenRoute) ->Unit,
 ) {
-    Scaffold(containerColor = LocalAppColors.current.background) { paddingValues ->
+    val snackbarHostState = remember { SnackbarHostState() }
+    Scaffold(containerColor = LocalAppColors.current.background,
+        snackbarHost = {SnackbarHost(hostState = snackbarHostState)}) { paddingValues ->
         val uiState by viewModel.loginUiState.collectAsState()
+        LaunchedEffect(uiState.errorMessage) {
+            val error = uiState.errorMessage
+            if(error!=null){
+                snackbarHostState.showSnackbar(error)
+                viewModel.clearError()
+            }
+        }
+        LaunchedEffect(uiState.navigateToRoute) {
+            val route = uiState.navigateToRoute
+            if(route!=null){
+                onNavigateToAuthRoute(route)
+                viewModel.onNavigationHandled()
+            }
+        }
         LoadingIndicator(isLoading = uiState.isLoading) {
             LoginScreenLayout(
                 modifier = Modifier.padding(paddingValues),
