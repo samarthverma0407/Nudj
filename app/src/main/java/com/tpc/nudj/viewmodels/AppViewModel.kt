@@ -103,9 +103,6 @@ class AppViewModel @Inject constructor(
                 if (user == null) {
                     _authState.value = AuthState.Unauthenticated
                 }
-                else{
-                    resolveInitialDestination()
-                }
             }
         }
     }
