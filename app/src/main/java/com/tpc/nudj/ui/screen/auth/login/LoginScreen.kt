@@ -66,8 +66,7 @@ import com.tpc.nudj.ui.theme.LocalAppColors
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
-    navigateToCreateAccount: () ->Unit,
-    onNavigateToAuthRoute: (ScreenRoute) ->Unit,
+    navigateToCreateAccount: () ->Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(containerColor = LocalAppColors.current.background,
@@ -78,13 +77,6 @@ fun LoginScreen(
             if(error!=null){
                 snackbarHostState.showSnackbar(error)
                 viewModel.clearError()
-            }
-        }
-        LaunchedEffect(uiState.navigateToRoute) {
-            val route = uiState.navigateToRoute
-            if(route!=null){
-                onNavigateToAuthRoute(route)
-                viewModel.onNavigationHandled()
             }
         }
         LoadingIndicator(isLoading = uiState.isLoading) {

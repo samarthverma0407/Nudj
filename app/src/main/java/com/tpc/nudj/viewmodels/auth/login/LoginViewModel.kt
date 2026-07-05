@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.tpc.nudj.model.AuthResult
 import com.tpc.nudj.model.enums.Role
 import com.tpc.nudj.repository.auth.AuthRepository
-import com.tpc.nudj.ui.navigation.ScreenRoute
 import com.tpc.nudj.ui.screen.auth.login.LoginUiState
 import com.tpc.nudj.utils.Validator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,9 +49,9 @@ class LoginViewModel @Inject constructor(
 //            _loginUiState.update { it.copy(isLoading = false) }
 //        }
         val currentEmail=_loginUiState.value.email
-        Validator.isValidEmail(currentEmail,
+        Validator.isValidEmail(currentEmail).fold(
             {performFirebaseLogin()},
-            {errorMessage -> displayErrorMessage(errorMessage)}
+            {error -> displayErrorMessage(error.message ?: "Invalid email")}
         )
     }
     fun performFirebaseLogin(){
@@ -70,9 +69,7 @@ class LoginViewModel @Inject constructor(
                     }
                     AuthResult.Initial -> {}
                     is AuthResult.VerificationNeeded -> {
-                        _loginUiState.update { it.copy(isLoading = false,
-                            navigateToRoute = ScreenRoute.Auth.EmailVerification)
-                        }
+                        _loginUiState.update { it.copy(isLoading = false) }
                     }
                     is AuthResult.Success -> {
                         val selectedUiRole = _loginUiState.value.role
@@ -97,11 +94,6 @@ class LoginViewModel @Inject constructor(
                 }
             }
 
-        }
-    }
-    fun onNavigationHandled(){
-        _loginUiState.update{
-            it.copy(navigateToRoute = null)
         }
     }
     fun displayErrorMessage(errorMessage: String){
