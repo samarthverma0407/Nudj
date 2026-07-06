@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,6 +69,7 @@ fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
     navigateToCreateAccount: () ->Unit
 ) {
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(containerColor = LocalAppColors.current.background,
         snackbarHost = {SnackbarHost(hostState = snackbarHostState)}) { paddingValues ->
@@ -91,7 +93,7 @@ fun LoginScreen(
                 },
                 onForgotPasswordClick = viewModel::onForgotPasswordClick,
                 onLoginClick = viewModel::onLoginClick,
-                onGoogleClick = viewModel::onGoogleClick,
+                onGoogleClick = {viewModel.onGoogleClick(context)},
                 onPasswordVisibilityToggle = viewModel::togglePasswordVisibility,
                 onRoleSelected = { role ->
                     viewModel.onRoleSelected(role)

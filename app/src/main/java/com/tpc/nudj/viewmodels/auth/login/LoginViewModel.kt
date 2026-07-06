@@ -1,10 +1,13 @@
 package com.tpc.nudj.viewmodels.auth.login
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tpc.nudj.model.AuthResult
 import com.tpc.nudj.model.enums.Role
 import com.tpc.nudj.repository.auth.AuthRepository
+import com.tpc.nudj.repository.auth.GoogleSignInClient
+import com.tpc.nudj.repository.user.UserRepository
 import com.tpc.nudj.ui.screen.auth.login.LoginUiState
 import com.tpc.nudj.utils.Validator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +20,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
+    private val googleSignInClient: GoogleSignInClient
 ) : ViewModel() {
     private val _loginUiState = MutableStateFlow(LoginUiState())
     val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
@@ -111,7 +116,66 @@ class LoginViewModel @Inject constructor(
 
     fun onForgotPasswordClick() {}
 
-    fun onGoogleClick() {}
+    fun onGoogleClick(context: Context) {
+        viewModelScope.launch {
+            val idToken = googleSignInClient.signIn(context)
+            if (idToken == null) {
+                displayErrorMessage("Google Sign-In failed.")
+                return@launch
+            }
+            authRepository
+                .signInWithGoogle(idToken, loginUiState.value.role)
+                .collect { status ->
+                    when (status) {
+                        AuthResult.Loading -> {
+                            _loginUiState.update {
+                                it.copy(isLoading = true)
+                            }
+                        }
+                        is AuthResult.Success -> {
+                            val firebaseUser = status.user
+                            if (!userRepository.userExists(firebaseUser.uid)) {
+                                authRepository.signOut()
+                                _loginUiState.update {
+                                    it.copy(isLoading = false)
+                                }
+                                displayErrorMessage(
+                                    "Account doesn't exist. Please register first."
+                                )
+                                return@collect
+                            }
+                            val firestoreRole =
+                                userRepository.fetchUserRole(firebaseUser.uid)
+                            if (firestoreRole != loginUiState.value.role) {
+                                authRepository.signOut()
+                                _loginUiState.update {
+                                    it.copy(isLoading = false)
+                                }
+                                displayErrorMessage(
+                                    "Unauthorized. Please use the correct Portal layout role to login."
+                                )
+                            } else {
+                                _loginUiState.update {
+                                    it.copy(isLoading = false)
+                                }
+                            }
+                        }
+                        is AuthResult.Error -> {
+                            _loginUiState.update {
+                                it.copy(isLoading = false)
+                            }
+                            displayErrorMessage(status.message)
+                        }
+                        AuthResult.Initial,
+                        is AuthResult.VerificationNeeded -> {
+                            _loginUiState.update {
+                                it.copy(isLoading = false)
+                            }
+                        }
+                    }
+                }
+        }
+    }
 
     fun onRoleSelected(role: Role) {
         _loginUiState.update {
