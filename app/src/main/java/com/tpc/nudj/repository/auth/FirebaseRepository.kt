@@ -26,7 +26,7 @@ class FirebaseAuthRepository(
         val authStateListener = FirebaseAuth.AuthStateListener { auth ->
             val firebaseUser = auth.currentUser
             if (firebaseUser != null) {
-                CoroutineScope(Dispatchers.IO).launch {
+                launch(Dispatchers.IO) {
                     try {
                         val role = userRepository.fetchUserRole(firebaseUser.uid)
                         trySend(
