@@ -48,13 +48,7 @@ class LoginViewModel @Inject constructor(
         }
     }
     fun onLoginClick() {
-        //        viewModelScope.launch {
-//            _loginUiState.update { it.copy(isLoading = true) }
-//            delay(2000)
-//            _loginUiState.update { it.copy(isLoading = false) }
-//        }
-        val currentEmail=_loginUiState.value.email
-        Validator.isValidEmail(currentEmail).fold(
+        Validator.isValidEmail(_loginUiState.value.email).fold(
             {performFirebaseLogin()},
             {error -> displayErrorMessage(error.message ?: "Invalid email")}
         )
@@ -77,20 +71,7 @@ class LoginViewModel @Inject constructor(
                         _loginUiState.update { it.copy(isLoading = false) }
                     }
                     is AuthResult.Success -> {
-                        val selectedUiRole = _loginUiState.value.role
-                        val registeredDatabaseRole = status.user.role
-                        if(selectedUiRole!=registeredDatabaseRole){
-                            authRepository.signOut()
-                            _loginUiState.update{
-                                it.copy(isLoading = false)
-                            }
-                            displayErrorMessage("Unauthorized. Please use the correct Portal layout role to login.")
-                        }
-                        else{
-                            _loginUiState.update {
-                                it.copy(isLoading = false)
-                            }
-                        }
+                        validateRole(status.user.role)
                     }
                     is AuthResult.Error -> {
                         _loginUiState.update { it.copy(isLoading = false) }
@@ -146,19 +127,7 @@ class LoginViewModel @Inject constructor(
                             }
                             val firestoreRole =
                                 userRepository.fetchUserRole(firebaseUser.uid)
-                            if (firestoreRole != loginUiState.value.role) {
-                                authRepository.signOut()
-                                _loginUiState.update {
-                                    it.copy(isLoading = false)
-                                }
-                                displayErrorMessage(
-                                    "Unauthorized. Please use the correct Portal layout role to login."
-                                )
-                            } else {
-                                _loginUiState.update {
-                                    it.copy(isLoading = false)
-                                }
-                            }
+                            validateRole(firestoreRole)
                         }
                         is AuthResult.Error -> {
                             _loginUiState.update {
@@ -181,6 +150,21 @@ class LoginViewModel @Inject constructor(
         _loginUiState.update {
             it.copy(role = role)
         }
+    }
+
+    private suspend fun validateRole(registeredRole : Role){
+        if(registeredRole != _loginUiState.value.role){
+            authRepository.signOut()
+            _loginUiState.update {
+                it.copy(isLoading = false)
+            }
+            displayErrorMessage("Unauthorized. Please use the correct Portal layout role to login.")
+            return
+        }
+        _loginUiState.update {
+            it.copy(isLoading = false)
+        }
+        return
     }
 
 }

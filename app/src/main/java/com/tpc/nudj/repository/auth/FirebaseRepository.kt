@@ -81,7 +81,6 @@ class FirebaseAuthRepository(
                         )
                     )
                 } else {
-                    firebaseUser.sendEmailVerification().await()
                     emit(AuthResult.VerificationNeeded(email))
                 }
             } else {

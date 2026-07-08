@@ -35,7 +35,6 @@ class AppViewModel @Inject constructor(
 
     init {
         observeAuthState()
-        refreshAuthState()
     }
 
     fun refreshAuthState() {
