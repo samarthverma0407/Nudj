@@ -139,6 +139,51 @@ fun PasswordTextField(
         }
     )
 }
+@Composable
+fun NudjDescriptionTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    title : String
+) {
+    Column(){
+        Text(
+            text=title,
+            style = MaterialTheme.typography.titleMedium,
+            color=LocalAppColors.current.onBackground
+            )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+
+            singleLine = false,
+            minLines = 5,
+
+            textStyle = MaterialTheme.typography.bodyLarge,
+
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = LocalAppColors.current.textFieldColor,
+                unfocusedContainerColor = LocalAppColors.current.textFieldColor,
+                focusedBorderColor = LocalAppColors.current.textFieldBorderColor,
+                unfocusedBorderColor = LocalAppColors.current.textFieldBorderColor,
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedPlaceholderColor = Color(0xFF728C9D),
+                unfocusedPlaceholderColor = Color(0xFF728C9D),
+                cursorColor = Color.Black
+            )
+        )
+    }
+}
 
 @Preview(name = "Light Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(name = "Dark Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)

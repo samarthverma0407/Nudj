@@ -22,40 +22,45 @@ import com.tpc.nudj.ui.theme.LocalAppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NudjDropDownMenu(
+fun <T> NudjDropDownMenu(
 
     expanded: Boolean = false,
-    onSelectedOptionChange: (Int) -> Unit,
-    selectedOption: Int?,
-    options: List<Int>,
+    onSelectedOptionChange: (T) -> Unit,
+    selectedOption: T?,
+    options: List<T>,
     placeholder: String,
-    trailingIcon: ImageVector,
-    leadingIcon: ImageVector,
+    trailingIcon: ImageVector?=null,
+    leadingIcon: ImageVector?=null,
     onExpandedStateChange: (Boolean) -> Unit,
+    optionLabel: (T) -> String = { it.toString() }
 ) {
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = onExpandedStateChange,
     ) {
         NudjTextField(
-            value = selectedOption?.toString() ?: "",
+            value = selectedOption?.let(optionLabel) ?: "",
             onValueChange = {},
             placeholder = placeholder,
 
-            trailingIcon = {
-                Icon(
-                    imageVector = trailingIcon,
-                    contentDescription = "trailingIcon"
-                )
+            trailingIcon = trailingIcon?.let{ icon ->
+                {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "trailingIcon"
+                    )
+                }
             },
-            leadingIcon = {
-                Icon(
-                    imageVector = leadingIcon,
-                    contentDescription = "leadingIcon",
-                )
+            leadingIcon = leadingIcon?.let{ icon ->
+                {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "leadingIcon"
+                    )
+                }
             },
             modifier = Modifier
-                .padding(10.dp)
+
                 .menuAnchor(
                     type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
                     enabled = true
@@ -76,7 +81,7 @@ fun NudjDropDownMenu(
 
                     text = {
                         Text(
-                            text = "$option",
+                            text = optionLabel(option),
                             style = MaterialTheme.typography.bodyLarge,
                             color = Color.Black
                         )
